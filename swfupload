@@ -1,0 +1,127 @@
+/**
+*
+*flash swfupload
+*share_yzh@163.com
+*sandyz
+*version 0.0.0
+*/
+
+
+var UploadPlagin = (function($, undefined){
+
+  //class upload_plagin
+	$.upload_plagin =function(options, e){
+		this.options = $.extend({}, $.upload_plagin.defaults, options);
+
+		this.curUpload = this._createUpload();
+	}
+
+	//prototype
+	$.upload_plagin.prototype = {
+		//create uploadswf plagin
+		_createUpload : function(){
+			var that = this, op = this.options;
+
+			var config = {
+				flash_url : op.flash_url,//flash url
+                upload_url: op.upload_url,//upload url
+                post_params: {},//post params
+                file_size_limit : op.filesize,//max file size
+                file_types : op.fileType,//only this type can upload
+                file_types_description : op.description,
+                file_upload_limit : op.file_upload_limit,//upload size
+                file_queue_limit : 0,
+                custom_settings : {},
+                debug: false,
+                prevent_swf_caching: true,
+
+                button_action : SWFUpload.BUTTON_ACTION.SELECT_FILE,//can select one or select multiple
+                button_window_mode : SWFUpload.WINDOW_MODE.TRANSPARENT,
+
+                // Button settings
+                button_image_url: op.button_image_url,//flash button url suggest must set it
+                button_width: op.button_width,//flash button width
+                button_height: op.button_height,//flash button height
+                button_placeholder_id: op.targetId,//the target flash init and suggest set an empty sapn
+                button_text:op.button_text,//button text
+                button_text_style:"",//button style
+                button_text_left_padding: 0,//button style
+                button_text_top_padding: 2,//button style
+                button_cursor : SWFUpload.CURSOR.HAND,//button style
+
+                file_dialog_complete_handler : function(numFilesSelected, numFilesQueued){that.fileDialogComplete(numFilesSelected, numFilesQueued)},
+                upload_start_handler : function(file){that.uploadStart(file)},
+                upload_progress_handler : function(file, bytesLoaded, bytesTotal){that.uploadProgress(file, bytesLoaded, bytesTotal)},
+                upload_error_handler : function(file, errorCode, message){that.uploadError(file, errorCode, message)},
+                upload_success_handler : function(file, serverData){that.uploadSuccess(file, serverData)},
+                file_queue_error_handler : function(file, errorCode, message){that.sFileQueueError(file, errorCode, message)}
+			}
+
+			return new SWFUpload(configs);
+		},
+		//flash close trigger
+		fileDialogComplete:function(numFilesSelected, numFilesQueued){
+			if(!!numFilesSelected)
+	        {
+    			this.curUpload.startUpload();
+	        }
+		},
+		//start upload
+		uploadStart : function(file){
+			if($.isFunction(this.options.fnUploadStart)){
+				this.options.fnUploadStart(file);
+			}
+    	},
+    	//the progress upload
+    	uploadProgress : function (file, bytesLoaded, bytesTotal){
+			if($.isFunction(this.options.fnProgress)){
+				this.options.fnProgress(file, bytesLoaded, bytesTotal);
+			}
+    	},
+    	//upload success
+    	uploadSuccess : function (file, serverData){
+    		if($.isFunction(this.options.fnSuccess)){
+    			this.options.fnSuccess(file, serverData);
+			}
+        },
+        //upload error
+    	uploadError : function (file, errorCode, message){
+            if($.isFunction(this.options.fnUploadError)){
+    			this.options.fnUploadError(file, errorCode, message);
+			}
+        },
+        //the queue error
+    	sFileQueueError : function(file, errorCode, message){
+	        if($.isFunction(this.options.fnFileQueueError)){
+    			this.options.fnFileQueueError(file, errorCode, message);
+			}
+	    }
+	};
+
+	//plagin defaults
+	$.upload_plagin.defaults = {
+		flash_url:"",
+		upload_url:"",
+		targetId:"",
+		file_upload_limit:"10",
+		filesize:"10MB",
+		fileType:"*.jpg;*.jpeg;*.png;*.gif;*.bmp;",
+		description:"请选择图片",
+		button_width:50,
+		button_height:50,
+		button_image_url:"./blank.png",
+		fnProgress:function(){},
+		fnSuccess:function(){},
+		fnDialogComplete:function(){},
+		fnUploadStart:function(){},
+		fnUploadError:function(){},
+		fnFileQueueError:function(){}
+	};
+
+
+	//jquery plagin
+	$.fn.initSwfPlagin = function(options){
+		return new $.upload_plagin(options, this);
+	}
+
+})(window.jQuery);
